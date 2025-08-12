@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlluPay | Powering Your Business Expenses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page, top-to-bottom narrative flow designed for user engagement. It starts with a strong Hero section to state the value proposition. It then moves to an interactive 'Benefits' section with tabs to encourage user interaction and break down information. This is followed by a visual, clickable 'How It Works' stepper to simplify the process. The centerpiece is an interactive 'Benefit Calculator' with a slider and chart, turning an abstract promise into a tangible value for the user. This structure guides the user from awareness to engagement and finally to a clear call-to-action, which is more effective for conversion than a static flyer layout. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key Benefits (Credit, Rewards, International Pay). Goal: Inform/Compare. Viz: Interactive Tabs (HTML/CSS/JS). Interaction: Click to reveal details. Justification: Prevents information overload and encourages active exploration over passive reading.
+        - Report Info: 4-Step Process. Goal: Organize/Explain. Viz: Numbered Stepper Diagram (HTML/Tailwind). Interaction: Click step to highlight details. Justification: More intuitive and visually appealing for a process flow than a simple list.
+        - Report Info: "Discover how much benefit...". Goal: Relate/Quantify. Viz: Doughnut Chart (Chart.js/Canvas) + HTML Slider. Interaction: User slides to input monthly expenses; chart and text update instantly to show potential rewards. Justification: This is the 'wow' factor, making the service's value personal and concrete, which is highly persuasive. Library: Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #1a202c;
+        }
+        .highlight-red {
+            color: #E53E3E;
+        }
+        .bg-brand-red {
+            background-color: #E53E3E;
+        }
+        .border-brand-red {
+            border-color: #E53E3E;
+        }
+        .benefit-tab.active {
+            background-color: #E53E3E;
+            color: #ffffff;
+            border-color: #E53E3E;
+        }
+        .step.active .step-circle {
+            background-color: #E53E3E;
+            color: #ffffff;
+            border-color: #E53E3E;
+        }
+        .step.active .step-text {
+            font-weight: 700;
+            color: #1a202c;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold">Allu<span class="highlight-red">Pay</span></div>
+            <div>
+                <a href="#contact" class="bg-brand-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Get Started</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="container mx-auto px-6 py-20 md:py-32 text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Powering Your Business Expenses, <span class="highlight-red">Globally.</span></h1>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-600 mb-8">Extend your working capital, maximize card rebates, and gain clear visibility into business expenses – all while paying anyone, anywhere, even if they don't accept cards.</p>
+            <a href="#benefits" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-900 transition duration-300">Explore Benefits</a>
+        </section>
+
+        <section id="benefits" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">You might be leaving money on the table.</h2>
+                    <p class="text-gray-600 text-lg">With AlluPay, you can start to:</p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex flex-col md:flex-row justify-center mb-8 border-b">
+                        <button class="benefit-tab active flex-1 py-3 px-4 font-semibold text-lg border-b-4 transition duration-300" data-tab="benefit-1">Finance Your Business</button>
+                        <button class="benefit-tab flex-1 py-3 px-4 font-semibold text-lg border-b-4 border-transparent text-gray-500 hover:text-gray-800 transition duration-300" data-tab="benefit-2">Maximize Rewards</button>
+                        <button class="benefit-tab flex-1 py-3 px-4 font-semibold text-lg border-b-4 border-transparent text-gray-500 hover:text-gray-800 transition duration-300" data-tab="benefit-3">Pay International Suppliers</button>
+                    </div>
+
+                    <div id="benefit-content" class="mt-8">
+                        <div id="benefit-1" class="benefit-panel">
+                            <h3 class="text-2xl font-bold mb-4">Take full advantage of a free credit line.</h3>
+                            <p class="text-gray-600">Similar to how you use a personal credit card, AlluPay helps you maximize the time to pay for expenses so you can enjoy up to 55 days of free credit. You can now use your card to pay for rent, suppliers, tax, and even salaries.</p>
+                        </div>
+                        <div id="benefit-2" class="benefit-panel hidden">
+                            <h3 class="text-2xl font-bold mb-4">Maximize rewards and cashback.</h3>
+                            <p class="text-gray-600">Every business expense can now bring you cashback and rewards from your current credit card. If you don't have one yet, we can help you find the best option to open a new line of revenue.</p>
+                        </div>
+                        <div id="benefit-3" class="benefit-panel hidden">
+                            <h3 class="text-2xl font-bold mb-4">Pay international suppliers with your Card.</h3>
+                            <p class="text-gray-600">AlluPay helps you pay international suppliers by leveraging the benefits from your credit card as a domestic transaction, simplifying cross-border commerce.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">How It Works</h2>
+                    <p class="text-gray-600 text-lg">A seamless solution powered by AI.</p>
+                </div>
+
+                <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                    <div class="step active" data-step="1">
+                        <div class="step-circle w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold border-2 border-gray-300 rounded-full mb-4 transition duration-300">1</div>
+                        <h3 class="step-text text-xl font-semibold text-gray-500 transition duration-300">Add your card</h3>
+                    </div>
+                     <div class="step" data-step="2">
+                        <div class="step-circle w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold border-2 border-gray-300 rounded-full mb-4 transition duration-300">2</div>
+                        <h3 class="step-text text-xl font-semibold text-gray-500 transition duration-300">Send expenses</h3>
+                    </div>
+                     <div class="step" data-step="3">
+                        <div class="step-circle w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold border-2 border-gray-300 rounded-full mb-4 transition duration-300">3</div>
+                        <h3 class="step-text text-xl font-semibold text-gray-500 transition duration-300">Calculate time to pay</h3>
+                    </div>
+                     <div class="step" data-step="4">
+                        <div class="step-circle w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold border-2 border-gray-300 rounded-full mb-4 transition duration-300">4</div>
+                        <h3 class="step-text text-xl font-semibold text-gray-500 transition duration-300">Confirm</h3>
+                    </div>
+                </div>
+                <div id="step-details" class="max-w-2xl mx-auto mt-8 p-8 bg-white rounded-lg shadow-md text-center">
+                    <p id="step-description" class="text-gray-600 text-lg"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-2">Discover Your Potential Benefits</h2>
+                    <p class="text-gray-600 text-lg">Use the slider to estimate your monthly business expenses and see your potential annual rewards.</p>
+                </div>
+                <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <label for="expense-slider" class="block text-lg font-semibold mb-2">Monthly Business Expenses: <span id="expense-value" class="font-bold highlight-red">$50,000</span></label>
+                        <input id="expense-slider" type="range" min="1000" max="250000" value="50000" step="1000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        
+                        <div class="mt-8 p-6 bg-gray-50 rounded-lg">
+                            <h4 class="text-lg font-semibold">Estimated Annual Rewards:</h4>
+                            <p class="text-4xl font-extrabold highlight-red" id="reward-value">$9,000</p>
+                            <p class="text-gray-500 mt-1">Based on an average 1.5% cashback rate.</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="rewardsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer id="contact" class="bg-gray-800 text-white">
+            <div class="container mx-auto px-6 py-16 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Maximize your working capital and cashback!</h2>
+                <p class="max-w-2xl mx-auto text-gray-300 mb-8">Contact us to get started and see how much benefit you can bring to your business.</p>
+                <a href="#" class="bg-brand-red text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition duration-300 text-lg">Get Started Now</a>
+                <div class="mt-12">
+                    <p class="font-bold text-xl mb-4">Scan to Learn More</p>
+                    <div class="w-40 h-40 bg-white p-2 rounded-lg inline-block shadow-lg">
+                        <img src="https://placehold.co/160x160/E53E3E/FFFFFF?text=QR+Code" alt="QR Code Placeholder" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-gray-700 pt-8">
+                    <p>&copy; 2025 AlluPay. All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stepDetails = {
+                1: 'Add your card to AlluPay or request one. Securely link your existing business credit cards to get started in minutes.',
+                2: 'Select the expenses to pay or send us your invoices, and AlluPay AI will digitize and suggest the optimal ones to pay.',
+                3: 'Our robust AI platform analyzes your card\'s billing cycle and payment terms to recommend the best time to pay, maximizing your free credit period.',
+                4: 'Just confirm the date and terms. We process the payments to your suppliers, and you get full visibility and control to optimize your cash flow with AlluPay.'
+            };
+
+            const benefitTabs = document.querySelectorAll('.benefit-tab');
+            const benefitPanels = document.querySelectorAll('.benefit-panel');
+
+            benefitTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    benefitTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    benefitPanels.forEach(panel => {
+                        if (panel.id === tab.dataset.tab) {
+                            panel.classList.remove('hidden');
+                        } else {
+                            panel.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const steps = document.querySelectorAll('.step');
+            const stepDescription = document.getElementById('step-description');
+            
+            function updateStepContent(stepNumber) {
+                steps.forEach(s => {
+                    if(s.dataset.step === stepNumber) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+                stepDescription.textContent = stepDetails[stepNumber];
+            }
+
+            steps.forEach(step => {
+                step.addEventListener('click', () => {
+                    updateStepContent(step.dataset.step);
+                });
+            });
+
+            updateStepContent('1');
+
+            const expenseSlider = document.getElementById('expense-slider');
+            const expenseValue = document.getElementById('expense-value');
+            const rewardValue = document.getElementById('reward-value');
+            const rewardsChartCanvas = document.getElementById('rewardsChart').getContext('2d');
+            let rewardsChart;
+
+            const REWARD_RATE = 0.015;
+
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+            }
+
+            function createOrUpdateChart(expenses, rewards) {
+                const data = {
+                    labels: ['Total Expenses', 'Potential Rewards'],
+                    datasets: [{
+                        data: [expenses, rewards],
+                        backgroundColor: [
+                            '#E53E3E',
+                            '#dc2626'
+                        ],
+                        borderColor: '#F8F7F4',
+                        borderWidth: 4,
+                        hoverOffset: 4
+                    }]
+                };
+
+                if (rewardsChart) {
+                    rewardsChart.data = data;
+                    rewardsChart.update();
+                } else {
+                    rewardsChart = new Chart(rewardsChartCanvas, {
+                        type: 'doughnut',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: false
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            function updateCalculator() {
+                const monthlyExpenses = parseInt(expenseSlider.value);
+                const annualExpenses = monthlyExpenses * 12;
+                const annualRewards = annualExpenses * REWARD_RATE;
+
+                expenseValue.textContent = formatCurrency(monthlyExpenses);
+                rewardValue.textContent = formatCurrency(annualRewards);
+                
+                createOrUpdateChart(annualExpenses, annualRewards);
+            }
+
+            expenseSlider.addEventListener('input', updateCalculator);
+            
+            updateCalculator();
+        });
+    </script>
+</body>
+</html>
