@@ -68,7 +68,7 @@
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-2xl font-bold">Allu<span class="highlight-red">Pay</span></div>
             <div>
-                <a href="#contact" class="bg-brand-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Get Started</a>
+                <button id="get-started-btn" class="bg-brand-red text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">Get Started</button>
             </div>
         </nav>
     </header>
@@ -171,7 +171,7 @@
             <div class="container mx-auto px-6 py-16 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-4">Maximize your working capital and cashback!</h2>
                 <p class="max-w-2xl mx-auto text-gray-300 mb-8">Contact us to get started and see how much benefit you can bring to your business.</p>
-                <a href="#" class="bg-brand-red text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition duration-300 text-lg">Get Started Now</a>
+                <button id="get-started-footer-btn" class="bg-brand-red text-white font-bold py-3 px-8 rounded-lg hover:bg-red-700 transition duration-300 text-lg">Get Started Now</button>
                 <div class="mt-12">
                     <p class="font-bold text-xl mb-4">Scan to Learn More</p>
                     <div class="w-40 h-40 bg-white p-2 rounded-lg inline-block shadow-lg">
@@ -185,8 +185,117 @@
         </footer>
     </main>
 
+    <!-- Modal Popup -->
+    <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Get Started with AlluPay</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <form id="signup-form" class="space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                    <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                    <input type="text" id="company" name="company" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full bg-brand-red text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success-message" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden z-50">
+        <div class="flex items-center">
+            <span class="mr-2">✓</span>
+            <span>Thank you! We'll be in touch soon.</span>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Modal functionality
+            const modal = document.getElementById('signup-modal');
+            const getStartedBtn = document.getElementById('get-started-btn');
+            const getStartedFooterBtn = document.getElementById('get-started-footer-btn');
+            const closeModal = document.getElementById('close-modal');
+            const signupForm = document.getElementById('signup-form');
+            const successMessage = document.getElementById('success-message');
+
+            // Open modal
+            function openModal() {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Close modal
+            function closeModalFunc() {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                signupForm.reset();
+            }
+
+            // Event listeners for modal
+            getStartedBtn.addEventListener('click', openModal);
+            getStartedFooterBtn.addEventListener('click', openModal);
+            closeModal.addEventListener('click', closeModalFunc);
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModalFunc();
+                }
+            });
+
+            // Handle form submission
+            signupForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(signupForm);
+                const userData = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    company: formData.get('company')
+                };
+
+                try {
+                    // Send data to MongoDB via API
+                    const response = await fetch('/api/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success message
+                        closeModalFunc();
+                        successMessage.classList.remove('hidden');
+                        setTimeout(() => {
+                            successMessage.classList.add('hidden');
+                        }, 3000);
+
+                        console.log('User saved to MongoDB:', result.data);
+                    } else {
+                        // Show error message
+                        alert('Error: ' + result.message);
+                        console.error('Signup error:', result.message);
+                    }
+                } catch (error) {
+                    console.error('Network error:', error);
+                    alert('Network error. Please try again.');
+                }
+            });
+
             const stepDetails = {
                 1: 'Add your card to AlluPay or request one. Securely link your existing business credit cards to get started in minutes.',
                 2: 'Select the expenses to pay or send us your invoices, and AlluPay AI will digitize and suggest the optimal ones to pay.',
